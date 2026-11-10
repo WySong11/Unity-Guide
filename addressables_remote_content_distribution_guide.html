@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unity Addressables Remote Content Distribution 쉬운 설명</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --panel2: #1f2937;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #64748b;
+            --line: #cbd5e1;
+            --blue: #2563eb;
+            --sky: #0ea5e9;
+            --green: #16a34a;
+            --orange: #f97316;
+            --red: #ef4444;
+            --purple: #7c3aed;
+            --yellow: #facc15;
+            --soft-blue: #dbeafe;
+            --soft-green: #dcfce7;
+            --soft-orange: #ffedd5;
+            --soft-purple: #ede9fe;
+            --soft-red: #fee2e2;
+            --soft-yellow: #fef9c3;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+            line-height: 1.72;
+            color: var(--text);
+            background: #e5e7eb;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 52%, #0ea5e9 100%);
+            color: white;
+            padding: 52px 24px 42px;
+            text-align: center;
+        }
+
+        .hero .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(30px, 5vw, 52px);
+            line-height: 1.16;
+            letter-spacing: -0.04em;
+        }
+
+        .hero p {
+            max-width: 900px;
+            margin: 18px auto 0;
+            font-size: clamp(16px, 2.5vw, 21px);
+            color: rgba(255,255,255,0.88);
+        }
+
+        .container {
+            width: min(1120px, calc(100% - 32px));
+            margin: -26px auto 80px;
+        }
+
+        section {
+            background: var(--card);
+            border-radius: 22px;
+            padding: clamp(22px, 4vw, 36px);
+            margin: 22px 0;
+            box-shadow: 0 16px 40px rgba(15,23,42,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        h2 {
+            margin: 0 0 18px;
+            font-size: clamp(24px, 3.6vw, 34px);
+            line-height: 1.25;
+            letter-spacing: -0.03em;
+            color: #0f172a;
+        }
+
+        h3 {
+            margin: 30px 0 12px;
+            font-size: clamp(19px, 2.6vw, 25px);
+            color: #172554;
+        }
+
+        h4 {
+            margin: 22px 0 8px;
+            font-size: 18px;
+            color: #1e40af;
+        }
+
+        p { margin: 10px 0; }
+
+        strong { color: #0f172a; }
+
+        .lead {
+            font-size: 18px;
+            color: #334155;
+        }
+
+        .callout {
+            border-left: 6px solid var(--blue);
+            background: var(--soft-blue);
+            padding: 16px 18px;
+            border-radius: 14px;
+            margin: 18px 0;
+        }
+
+        .callout.green { border-left-color: var(--green); background: var(--soft-green); }
+        .callout.orange { border-left-color: var(--orange); background: var(--soft-orange); }
+        .callout.red { border-left-color: var(--red); background: var(--soft-red); }
+        .callout.purple { border-left-color: var(--purple); background: var(--soft-purple); }
+        .callout.yellow { border-left-color: #eab308; background: var(--soft-yellow); }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        @media (max-width: 780px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 18px;
+            background: #f8fafc;
+        }
+
+        .card h3, .card h4 { margin-top: 0; }
+
+        .mini-title {
+            font-weight: 800;
+            color: #0f172a;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        ul, ol { padding-left: 24px; }
+        li { margin: 7px 0; }
+
+        code {
+            background: #eef2ff;
+            color: #3730a3;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.94em;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e5e7eb;
+            padding: 18px;
+            border-radius: 16px;
+            overflow: auto;
+            line-height: 1.55;
+            border: 1px solid #334155;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        th, td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 13px 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eff6ff;
+            color: #172554;
+            font-weight: 800;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .diagram {
+            margin: 22px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            padding: 18px;
+            overflow-x: auto;
+        }
+
+        .diagram-title {
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        .flow {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+            min-width: 760px;
+        }
+
+        .flow-box {
+            flex: 1;
+            border-radius: 16px;
+            padding: 14px;
+            border: 2px solid #dbeafe;
+            background: #eff6ff;
+            text-align: center;
+            font-weight: 800;
+            color: #1e3a8a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .flow-box small {
+            display: block;
+            font-weight: 600;
+            color: #475569;
+            margin-top: 6px;
+        }
+
+        .arrow {
+            align-self: center;
+            font-size: 30px;
+            color: #2563eb;
+            font-weight: 900;
+        }
+
+        .split-diagram {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-width: 760px;
+        }
+
+        .bucket {
+            border-radius: 18px;
+            padding: 18px;
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+        }
+
+        .bucket.local { border-color: #bfdbfe; background: #eff6ff; }
+        .bucket.remote { border-color: #fed7aa; background: #fff7ed; }
+        .bucket.server { border-color: #ddd6fe; background: #f5f3ff; }
+
+        .bucket h4 {
+            margin: 0 0 12px;
+            font-size: 20px;
+        }
+
+        .asset-chip {
+            display: inline-block;
+            margin: 5px 4px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .svg-wrap {
+            width: 100%;
+            min-width: 760px;
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .checklist li::marker { color: var(--green); }
+        .danger-list li::marker { color: var(--red); }
+
+        .kbd {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 7px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            color: #475569;
+            font-size: 14px;
+        }
+
+        a { color: #2563eb; }
+
+        .top-index {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 900px) {
+            .top-index { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 520px) {
+            .top-index { grid-template-columns: 1fr; }
+        }
+
+        .index-item {
+            display: block;
+            text-decoration: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #0f172a;
+            border-radius: 14px;
+            padding: 12px;
+            font-weight: 800;
+        }
+
+        .index-item span {
+            display: block;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <div class="tag">Unity Addressables · Remote Content Distribution</div>
+        <h1>필수 에셋만 앱에 넣고<br />필요한 에셋은 서버에서 다운로드하기</h1>
+        <p>Addressables Remote 구조를 입문자도 이해할 수 있게 “앱 안의 Local 리소스”와 “서버의 Remote 리소스”로 나누어 설명합니다.</p>
+    </header>
+
+    <main class="container">
+        <section>
+            <h2>목차</h2>
+            <div class="top-index">
+                <a class="index-item" href="#concept">1. 핵심 개념<span>Local / Remote / Catalog</span></a>
+                <a class="index-item" href="#architecture">2. 전체 구조 그림<span>앱과 서버 분리</span></a>
+                <a class="index-item" href="#setup">3. Unity 설정 순서<span>Group, Profile, Path</span></a>
+                <a class="index-item" href="#runtime">4. 런타임 다운로드<span>Size → Download → Load</span></a>
+                <a class="index-item" href="#code">5. 예시 코드<span>다운로드 매니저</span></a>
+                <a class="index-item" href="#update">6. 업데이트 방식<span>Catalog와 패치</span></a>
+                <a class="index-item" href="#checklist">7. 실수 체크리스트<span>자주 터지는 문제</span></a>
+                <a class="index-item" href="#summary">8. 최종 요약<span>외우면 좋은 흐름</span></a>
+            </div>
+        </section>
+
+        <section id="concept">
+            <h2>1. Addressables Remote Content Distribution이란?</h2>
+            <p class="lead">
+                <strong>Addressables Remote Content Distribution</strong>은 게임 설치 파일에는 꼭 필요한 최소 에셋만 넣고,
+                추가 캐릭터, 스테이지, 스킨, 사운드, 이벤트 리소스 같은 큰 에셋은 서버에 올려두었다가 필요할 때 다운로드하는 구조입니다.
+            </p>
+
+            <div class="callout green">
+                <strong>한 줄 정의:</strong><br />
+                앱에는 <strong>LoadingScene, 기본 UI, 다운로드 시스템</strong>만 넣고,
+                서버에는 <strong>추가 콘텐츠 AssetBundle</strong>을 올려둔 뒤,
+                게임 실행 중 <code>GetDownloadSizeAsync</code> → <code>DownloadDependenciesAsync</code> → <code>LoadAssetAsync</code> 순서로 사용하는 방식입니다.
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="mini-title">일반 빌드 방식</div>
+                    <p>게임에서 쓸 가능성이 있는 에셋을 대부분 앱 안에 넣습니다.</p>
+                    <ul>
+                        <li>설치 용량이 커질 수 있음</li>
+                        <li>처음부터 모든 리소스를 가지고 있음</li>
+                        <li>리소스 업데이트를 하려면 앱 업데이트가 필요한 경우가 많음</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="mini-title">Remote Addressables 방식</div>
+                    <p>처음에는 필수 에셋만 가지고 시작하고, 필요한 콘텐츠만 서버에서 받습니다.</p>
+                    <ul>
+                        <li>초기 설치 용량을 줄일 수 있음</li>
+                        <li>스테이지, 스킨, 사운드를 나중에 추가 가능</li>
+                        <li>라이브 서비스형 콘텐츠 운영에 유리함</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture">
+            <h2>2. 전체 구조 그림</h2>
+            <p>가장 먼저 이해해야 할 것은 <strong>앱 내부 Local 영역</strong>과 <strong>서버 Remote 영역</strong>이 분리된다는 점입니다.</p>
+
+            <div class="diagram">
+                <div class="diagram-title">그림 1. 앱에는 필수 에셋만, 서버에는 추가 콘텐츠</div>
+                <div class="split-diagram">
+                    <div class="bucket local">
+                        <h4>📱 Player Build 안에 포함</h4>
+                        <span class="asset-chip">LoadingScene</span>
+                        <span class="asset-chip">MainMenu</span>
+                        <span class="asset-chip">기본 UI</span>
+                        <span class="asset-chip">기본 폰트</span>
+                        <span class="asset-chip">다운로드 팝업</span>
+                        <span class="asset-chip">AddressableDownloadManager</span>
+                        <span class="asset-chip">Local Catalog</span>
+                        <p class="note">인터넷이 없어도 최소 실행은 되어야 하는 것들입니다.</p>
+                    </div>
+                    <div class="bucket remote">
+                        <h4>☁️ Server / CDN에 업로드</h4>
+                        <span class="asset-chip">Stage_01.bundle</span>
+                        <span class="asset-chip">Stage_02.bundle</span>
+                        <span class="asset-chip">Characters.bundle</span>
+                        <span class="asset-chip">Skins.bundle</span>
+                        <span class="asset-chip">BGM.bundle</span>
+                        <span class="asset-chip">catalog.json</span>
+                        <span class="asset-chip">catalog.hash</span>
+                        <p class="note">사용자가 콘텐츠를 선택했을 때 필요한 만큼 다운로드합니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Addressables가 실제로 다운로드하는 것은 원본 파일이 아닙니다</h3>
+            <p>
+                서버에 <code>Goblin.prefab</code>, <code>Stage01.unity</code>, <code>BGM.wav</code> 원본을 그대로 올리는 것이 아닙니다.
+                Addressables Build를 하면 Unity가 에셋을 <strong>AssetBundle</strong> 파일로 묶습니다.
+            </p>
+
+            <div class="diagram">
+                <div class="diagram-title">그림 2. Unity 에셋이 서버용 Bundle로 바뀌는 과정</div>
+                <div class="flow">
+                    <div class="flow-box">Unity 원본 에셋<small>Prefab, Sprite, Scene, AudioClip</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Addressables Build<small>Group 설정에 따라 Bundle 생성</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">RemoteBuildPath<small>catalog.json, catalog.hash, .bundle</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Server / CDN<small>URL로 다운로드 가능해야 함</small></div>
+                </div>
+            </div>
+
+            <h3>Catalog는 주소록입니다</h3>
+            <p>
+                Addressables에서 <strong>Catalog</strong>는 “주소와 실제 파일 위치를 연결해주는 주소록”입니다.
+                코드에서는 <code>Stage_01</code>이라는 주소만 요청하지만, Catalog는 그 주소가 어느 Bundle 안에 있고 어디서 받아야 하는지 알려줍니다.
+            </p>
+
+            <div class="diagram">
+                <div class="diagram-title">그림 3. Catalog의 역할</div>
+                <svg class="svg-wrap" viewBox="0 0 920 360" role="img" aria-label="Catalog diagram">
+                    <defs>
+                        <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#2563eb" />
+                        </marker>
+                    </defs>
+                    <rect x="30" y="55" width="220" height="250" rx="20" fill="#eff6ff" stroke="#93c5fd" stroke-width="3" />
+                    <text x="140" y="95" text-anchor="middle" font-size="22" font-weight="800" fill="#1e3a8a">게임 코드</text>
+                    <rect x="65" y="125" width="150" height="46" rx="12" fill="#ffffff" stroke="#bfdbfe" />
+                    <text x="140" y="154" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">Load Stage_01</text>
+                    <rect x="65" y="190" width="150" height="46" rx="12" fill="#ffffff" stroke="#bfdbfe" />
+                    <text x="140" y="219" text-anchor="middle" font-size="16" font-weight="700" fill="#334155">Load Skin_Gold</text>
+
+                    <line x1="255" y1="180" x2="365" y2="180" stroke="#2563eb" stroke-width="4" marker-end="url(#arrowBlue)" />
+
+                    <rect x="370" y="40" width="260" height="280" rx="20" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="3" />
+                    <text x="500" y="80" text-anchor="middle" font-size="22" font-weight="800" fill="#5b21b6">Remote Catalog</text>
+                    <rect x="405" y="110" width="190" height="48" rx="12" fill="#ffffff" stroke="#ddd6fe" />
+                    <text x="500" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">Stage_01 → stages.bundle</text>
+                    <rect x="405" y="175" width="190" height="48" rx="12" fill="#ffffff" stroke="#ddd6fe" />
+                    <text x="500" y="205" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">Skin_Gold → skins.bundle</text>
+                    <rect x="405" y="240" width="190" height="48" rx="12" fill="#ffffff" stroke="#ddd6fe" />
+                    <text x="500" y="270" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">BGM_01 → sounds.bundle</text>
+
+                    <line x1="635" y1="180" x2="745" y2="180" stroke="#2563eb" stroke-width="4" marker-end="url(#arrowBlue)" />
+
+                    <rect x="750" y="55" width="140" height="250" rx="20" fill="#fff7ed" stroke="#fdba74" stroke-width="3" />
+                    <text x="820" y="95" text-anchor="middle" font-size="22" font-weight="800" fill="#9a3412">서버</text>
+                    <rect x="770" y="125" width="100" height="38" rx="10" fill="#ffffff" stroke="#fed7aa" />
+                    <text x="820" y="149" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">stages.bundle</text>
+                    <rect x="770" y="185" width="100" height="38" rx="10" fill="#ffffff" stroke="#fed7aa" />
+                    <text x="820" y="209" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">skins.bundle</text>
+                    <rect x="770" y="245" width="100" height="38" rx="10" fill="#ffffff" stroke="#fed7aa" />
+                    <text x="820" y="269" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">sounds.bundle</text>
+                </svg>
+            </div>
+        </section>
+
+        <section id="setup">
+            <h2>3. Unity Editor 설정 순서</h2>
+            <p>처음 설정할 때는 아래 순서대로 진행하면 됩니다.</p>
+
+            <h3>1단계: Addressables 설치</h3>
+            <ol>
+                <li><span class="kbd">Window</span> → <span class="kbd">Package Manager</span></li>
+                <li><code>Addressables</code> 검색</li>
+                <li>패키지 설치</li>
+                <li><span class="kbd">Window</span> → <span class="kbd">Asset Management</span> → <span class="kbd">Addressables</span> → <span class="kbd">Groups</span> 열기</li>
+            </ol>
+
+            <h3>2단계: Group을 Local과 Remote로 나누기</h3>
+            <p>입문자에게 추천하는 Group 구조입니다.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Group 이름</th>
+                        <th>위치</th>
+                        <th>넣을 에셋</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Local_Core</code></td>
+                        <td>앱 안</td>
+                        <td>LoadingScene, 기본 UI, 기본 폰트, 다운로드 팝업, Manager</td>
+                    </tr>
+                    <tr>
+                        <td><code>Remote_Stages</code></td>
+                        <td>서버</td>
+                        <td>추가 스테이지 Scene, 스테이지 배경, 맵 리소스</td>
+                    </tr>
+                    <tr>
+                        <td><code>Remote_Characters</code></td>
+                        <td>서버</td>
+                        <td>추가 캐릭터 Prefab, 몬스터 Prefab, 보스 Prefab</td>
+                    </tr>
+                    <tr>
+                        <td><code>Remote_UI_Icons</code></td>
+                        <td>서버</td>
+                        <td>대량의 아이콘, 배지, 이벤트 UI 이미지</td>
+                    </tr>
+                    <tr>
+                        <td><code>Remote_Sounds</code></td>
+                        <td>서버</td>
+                        <td>BGM, 음성, 큰 효과음</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout orange">
+                <strong>중요:</strong> 다운로드 화면에 필요한 리소스는 Remote로 빼면 안 됩니다.
+                예를 들어 기본 폰트, 다운로드 팝업 배경, 재시도 버튼 아이콘까지 Remote에 있으면 인터넷이 안 될 때 화면 자체가 깨질 수 있습니다.
+            </div>
+
+            <h3>3단계: Remote Catalog 켜기</h3>
+            <p>Addressables Settings에서 다음 옵션을 켭니다.</p>
+            <ul>
+                <li><code>Build Remote Catalog</code> 체크</li>
+                <li>Remote Catalog의 Build Path / Load Path를 Remote 쪽으로 설정</li>
+            </ul>
+            <p>
+                Remote Catalog를 켜야 앱이 서버에 올라간 새 Catalog를 확인하고, 어떤 Bundle을 다운로드해야 하는지 알 수 있습니다.
+            </p>
+
+            <h3>4단계: Profile에서 RemoteBuildPath와 RemoteLoadPath 설정</h3>
+            <p>예를 들어 서버 주소가 아래와 같다고 가정합니다.</p>
+            <pre><code>https://my-game-cdn.com/addressables/Android</code></pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Profile 변수</th>
+                        <th>예시 값</th>
+                        <th>의미</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>RemoteBuildPath</code></td>
+                        <td><code>ServerData/[BuildTarget]</code></td>
+                        <td>Unity가 서버에 올릴 파일을 생성하는 로컬 폴더</td>
+                    </tr>
+                    <tr>
+                        <td><code>RemoteLoadPath</code></td>
+                        <td><code>https://my-game-cdn.com/addressables/[BuildTarget]</code></td>
+                        <td>게임 실행 중 실제로 다운로드할 URL</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="diagram">
+                <div class="diagram-title">그림 4. Build Path와 Load Path의 차이</div>
+                <div class="flow">
+                    <div class="flow-box">RemoteBuildPath<small>내 PC에 생성되는 업로드용 파일 위치</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">서버에 업로드<small>catalog, hash, bundle 파일</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">RemoteLoadPath<small>게임이 다운로드할 실제 URL</small></div>
+                </div>
+            </div>
+
+            <h3>5단계: Remote Group의 Path 설정</h3>
+            <p>Remote로 받을 Group은 다음처럼 설정합니다.</p>
+            <ul>
+                <li><code>Build Path</code> = <code>RemoteBuildPath</code></li>
+                <li><code>Load Path</code> = <code>RemoteLoadPath</code></li>
+            </ul>
+            <p>반대로 앱에 포함할 <code>Local_Core</code>는 Local Path를 사용합니다.</p>
+        </section>
+
+        <section id="runtime">
+            <h2>4. 런타임 다운로드 흐름</h2>
+            <p>
+                게임 실행 중에는 바로 <code>LoadAssetAsync</code>부터 호출하기보다,
+                먼저 다운로드가 필요한지 확인하고, 필요할 때만 다운로드한 뒤 로드하는 구조가 좋습니다.
+            </p>
+
+            <div class="diagram">
+                <div class="diagram-title">그림 5. 실제 게임 실행 중 흐름</div>
+                <div class="flow">
+                    <div class="flow-box">게임 시작<small>Local LoadingScene 실행</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Catalog 확인<small>CheckForCatalogUpdates</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">콘텐츠 선택<small>Stage_01 클릭</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">크기 확인<small>GetDownloadSizeAsync</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">다운로드<small>DownloadDependenciesAsync</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">로드/사용<small>LoadAssetAsync 또는 LoadSceneAsync</small></div>
+                </div>
+            </div>
+
+            <h3>핵심 API 4개</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>API</th>
+                        <th>역할</th>
+                        <th>언제 쓰나?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>CheckForCatalogUpdates</code></td>
+                        <td>서버에 새 Catalog가 있는지 확인</td>
+                        <td>게임 시작, 타이틀 화면, 업데이트 확인 화면</td>
+                    </tr>
+                    <tr>
+                        <td><code>UpdateCatalogs</code></td>
+                        <td>새 Catalog를 받아서 주소록 갱신</td>
+                        <td>새 리소스나 변경된 리소스를 반영할 때</td>
+                    </tr>
+                    <tr>
+                        <td><code>GetDownloadSizeAsync</code></td>
+                        <td>다운로드가 필요한 용량 확인</td>
+                        <td>다운로드 팝업을 띄우기 전</td>
+                    </tr>
+                    <tr>
+                        <td><code>DownloadDependenciesAsync</code></td>
+                        <td>해당 Address 또는 Label에 필요한 Bundle 다운로드</td>
+                        <td>콘텐츠 입장 전 사전 다운로드</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout purple">
+                <strong>추천 흐름:</strong><br />
+                <code>Stage_01</code>에 들어가기 전에 <code>GetDownloadSizeAsync("Stage_01")</code>로 크기를 확인합니다.
+                결과가 0이면 이미 캐시에 있는 것이므로 바로 로드합니다.
+                0보다 크면 다운로드 팝업을 띄운 뒤 <code>DownloadDependenciesAsync("Stage_01")</code>를 실행합니다.
+            </div>
+
+            <h3>Address 하나만 받기 vs Label로 묶어서 받기</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="mini-title">Address 하나만 다운로드</div>
+                    <pre><code>DownloadDependenciesAsync("Enemy_Goblin")</code></pre>
+                    <p>특정 프리팹이나 특정 스테이지 하나만 받을 때 사용하기 쉽습니다.</p>
+                </div>
+                <div class="card">
+                    <div class="mini-title">Label로 여러 에셋 묶음 다운로드</div>
+                    <pre><code>DownloadDependenciesAsync("Stage_01")</code></pre>
+                    <p>Stage_01에 필요한 Scene, BGM, Enemy, Background를 같은 Label로 묶어 한 번에 받을 수 있습니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="code">
+            <h2>5. 예시 코드</h2>
+            <p>
+                아래 코드는 입문자용 기본 구조입니다. 실제 프로젝트에서는 UI Slider, 팝업, 네트워크 재시도 버튼과 연결해서 사용하면 됩니다.
+            </p>
+
+            <h3>AddressableDownloadManager.cs</h3>
+            <pre><code>using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
+public class AddressableDownloadManager : MonoBehaviour
+{
+    public static AddressableDownloadManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    // 서버에 새 Catalog가 있는지 확인하고, 있으면 갱신합니다.
+    public IEnumerator UpdateCatalogIfNeeded()
+    {
+        AsyncOperationHandle&lt;List&lt;string&gt;&gt; checkHandle =
+            Addressables.CheckForCatalogUpdates();
+
+        yield return checkHandle;
+
+        if (checkHandle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Debug.LogWarning("Catalog 업데이트 확인 실패");
+            Addressables.Release(checkHandle);
+            yield break;
+        }
+
+        List&lt;string&gt; catalogs = checkHandle.Result;
+
+        if (catalogs != null &amp;&amp; catalogs.Count &gt; 0)
+        {
+            AsyncOperationHandle&lt;List&lt;UnityEngine.ResourceManagement.ResourceLocations.IResourceLocator&gt;&gt; updateHandle =
+                Addressables.UpdateCatalogs(catalogs);
+
+            yield return updateHandle;
+
+            if (updateHandle.Status == AsyncOperationStatus.Succeeded)
+                Debug.Log("Catalog 업데이트 완료");
+            else
+                Debug.LogWarning("Catalog 업데이트 실패");
+
+            Addressables.Release(updateHandle);
+        }
+        else
+        {
+            Debug.Log("업데이트할 Catalog 없음");
+        }
+
+        Addressables.Release(checkHandle);
+    }
+
+    // key에는 Address 또는 Label을 넣을 수 있습니다.
+    public IEnumerator DownloadIfNeeded(
+        object key,
+        Action&lt;long&gt; onSizeChecked = null,
+        Action&lt;float&gt; onProgress = null,
+        Action&lt;bool&gt; onComplete = null)
+    {
+        // 1. 먼저 다운로드해야 할 용량을 확인합니다.
+        AsyncOperationHandle&lt;long&gt; sizeHandle = Addressables.GetDownloadSizeAsync(key);
+
+        yield return sizeHandle;
+
+        if (sizeHandle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Debug.LogWarning("다운로드 크기 확인 실패: " + key);
+            Addressables.Release(sizeHandle);
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        long downloadSize = sizeHandle.Result;
+        onSizeChecked?.Invoke(downloadSize);
+        Addressables.Release(sizeHandle);
+
+        // 2. 이미 다운로드되어 있으면 바로 성공 처리합니다.
+        if (downloadSize &lt;= 0)
+        {
+            Debug.Log("이미 다운로드되어 있음: " + key);
+            onProgress?.Invoke(1f);
+            onComplete?.Invoke(true);
+            yield break;
+        }
+
+        // 3. 실제 다운로드를 시작합니다.
+        AsyncOperationHandle downloadHandle = Addressables.DownloadDependenciesAsync(key);
+
+        while (!downloadHandle.IsDone)
+        {
+            var status = downloadHandle.GetDownloadStatus();
+            float progress = 0f;
+
+            if (status.TotalBytes &gt; 0)
+                progress = status.Percent;
+            else
+                progress = downloadHandle.PercentComplete;
+
+            onProgress?.Invoke(progress);
+            yield return null;
+        }
+
+        bool success = downloadHandle.Status == AsyncOperationStatus.Succeeded;
+
+        if (success)
+            Debug.Log("다운로드 완료: " + key);
+        else
+            Debug.LogWarning("다운로드 실패: " + key);
+
+        Addressables.Release(downloadHandle);
+        onComplete?.Invoke(success);
+    }
+}</code></pre>
+
+            <h3>스테이지 버튼에서 사용하는 예시</h3>
+            <pre><code>using System.Collections;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+
+public class StageEnterButton : MonoBehaviour
+{
+    [SerializeField] private string m_stageKey = "Stage_01";
+
+    public void OnClickEnterStage()
+    {
+        StartCoroutine(EnterStageRoutine());
+    }
+
+    private IEnumerator EnterStageRoutine()
+    {
+        bool downloadSuccess = false;
+
+        yield return AddressableDownloadManager.Instance.DownloadIfNeeded(
+            m_stageKey,
+            onSizeChecked: size =&gt;
+            {
+                Debug.Log("필요 다운로드 용량: " + FormatBytes(size));
+                // 여기에서 "다운로드가 필요합니다" 팝업을 띄울 수 있습니다.
+            },
+            onProgress: progress =&gt;
+            {
+                Debug.Log("다운로드 진행률: " + (progress * 100f).ToString("F1") + "%");
+                // 여기에서 UI Slider.value = progress; 처리
+            },
+            onComplete: success =&gt;
+            {
+                downloadSuccess = success;
+            }
+        );
+
+        if (downloadSuccess == false)
+        {
+            Debug.LogWarning("다운로드 실패. 스테이지 입장 취소.");
+            yield break;
+        }
+
+        // Scene이 Addressable이라면 이렇게 로드할 수 있습니다.
+        Addressables.LoadSceneAsync(m_stageKey);
+    }
+
+    private string FormatBytes(long bytes)
+    {
+        if (bytes &lt; 1024)
+            return bytes + " B";
+
+        if (bytes &lt; 1024 * 1024)
+            return (bytes / 1024f).ToString("F1") + " KB";
+
+        return (bytes / 1024f / 1024f).ToString("F1") + " MB";
+    }
+}</code></pre>
+        </section>
+
+        <section id="update">
+            <h2>6. 서버 콘텐츠 업데이트 방식</h2>
+            <p>
+                Remote Addressables의 장점은 앱 전체를 다시 배포하지 않고도 서버의 리소스를 바꿀 수 있다는 점입니다.
+                단, <strong>C# 코드 자체는 AssetBundle로 업데이트할 수 없습니다.</strong>
+                스크립트 로직 변경은 일반 앱 업데이트가 필요합니다.
+            </p>
+
+            <div class="diagram">
+                <div class="diagram-title">그림 6. 출시 후 콘텐츠 업데이트 흐름</div>
+                <div class="flow">
+                    <div class="flow-box">앱 1.0 출시<small>content_state 파일 보관</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">새 에셋 추가<small>Stage_02, Skin_Gold</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Update Previous Build<small>변경 Bundle 생성</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">서버 업로드<small>새 catalog, hash, bundle</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">게임 실행<small>Catalog 업데이트 감지</small></div>
+                </div>
+            </div>
+
+            <h3>반드시 보관해야 하는 파일</h3>
+            <div class="callout red">
+                <strong><code>addressables_content_state.bin</code> 파일은 출시 빌드마다 반드시 보관하세요.</strong><br />
+                이 파일은 “이전에 출시했던 Addressables 콘텐츠 상태”를 기억하는 기준 파일입니다.
+                나중에 변경된 리소스만 패치 형태로 만들 때 필요합니다.
+            </div>
+
+            <h3>서버 업로드 폴더 예시</h3>
+            <pre><code>ServerData/Android
+├─ catalog_2026_06_26.json
+├─ catalog_2026_06_26.hash
+├─ remote_stages_assets_all.bundle
+├─ remote_characters_assets_all.bundle
+├─ remote_ui_icons_assets_all.bundle
+└─ remote_sounds_assets_all.bundle</code></pre>
+
+            <p>
+                Android, iOS, WebGL, Windows는 Bundle 포맷이 다르므로 플랫폼별로 따로 빌드하고 따로 업로드하는 것이 안전합니다.
+            </p>
+
+            <pre><code>ServerData
+├─ Android
+├─ iOS
+├─ WebGL
+└─ Windows</code></pre>
+        </section>
+
+        <section id="checklist">
+            <h2>7. 자주 하는 실수 체크리스트</h2>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="mini-title">좋은 구성</div>
+                    <ul class="checklist">
+                        <li>LoadingScene과 다운로드 UI는 Local에 둔다.</li>
+                        <li>스테이지별 리소스는 Label로 묶는다.</li>
+                        <li>Remote Group은 Build Path와 Load Path를 Remote로 둔다.</li>
+                        <li>다운로드 전 <code>GetDownloadSizeAsync</code>로 용량을 확인한다.</li>
+                        <li>플랫폼별로 Addressables Build를 따로 만든다.</li>
+                        <li>출시 시점의 <code>addressables_content_state.bin</code>을 보관한다.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="mini-title">위험한 구성</div>
+                    <ul class="danger-list">
+                        <li>다운로드 팝업 이미지나 폰트까지 Remote로 빼버린다.</li>
+                        <li>아이콘 하나마다 Bundle을 따로 만든다.</li>
+                        <li>자주 바뀌는 에셋과 거의 안 바뀌는 에셋을 같은 Bundle에 넣는다.</li>
+                        <li>Addressables Build 없이 Player Build만 한다.</li>
+                        <li>Android용 Bundle을 WebGL 서버 경로에 올린다.</li>
+                        <li>Addressables로 C# 코드까지 업데이트할 수 있다고 착각한다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>WebGL에서 특히 조심할 점</h3>
+            <div class="callout yellow">
+                WebGL에서 다른 도메인/CDN의 Bundle을 다운로드하려면 서버의 <strong>CORS 설정</strong>이 필요할 수 있습니다.
+                브라우저 보안 정책 때문에 URL은 맞는데도 다운로드가 막히는 경우가 있습니다.
+            </div>
+
+            <h3>Group을 나누는 기준</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>기준</th>
+                        <th>추천</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>항상 필요한 리소스</td>
+                        <td>Local Group</td>
+                    </tr>
+                    <tr>
+                        <td>용량이 큰 리소스</td>
+                        <td>Remote Group</td>
+                    </tr>
+                    <tr>
+                        <td>나중에 추가될 리소스</td>
+                        <td>Remote Group</td>
+                    </tr>
+                    <tr>
+                        <td>자주 바뀌는 이벤트 리소스</td>
+                        <td>별도 Remote Group</td>
+                    </tr>
+                    <tr>
+                        <td>공통 Material, 공통 Font, 공통 Texture</td>
+                        <td>중복 번들 방지를 위해 별도 관리 고려</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="summary">
+            <h2>8. 최종 요약</h2>
+            <p>Addressables Remote Content Distribution은 아래 흐름만 기억하면 됩니다.</p>
+
+            <div class="diagram">
+                <div class="diagram-title">그림 7. 반드시 외워야 하는 전체 흐름</div>
+                <div class="flow">
+                    <div class="flow-box">Local / Remote 분리<small>필수는 앱, 추가는 서버</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Addressables Build<small>Bundle, Catalog, Hash 생성</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">서버 업로드<small>RemoteBuildPath 파일 업로드</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">다운로드 확인<small>GetDownloadSizeAsync</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">필요할 때 다운로드<small>DownloadDependenciesAsync</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">로드해서 사용<small>LoadAssetAsync / LoadSceneAsync</small></div>
+                </div>
+            </div>
+
+            <div class="callout green">
+                <strong>실전 추천:</strong><br />
+                처음부터 모든 콘텐츠를 Remote로 만들지 말고,
+                <code>Local_Core</code>와 <code>Remote_Stage_01</code> 정도로 작게 테스트하세요.
+                “Stage_01을 서버에서 다운로드한 뒤 입장하기”가 성공하면 캐릭터, 스킨, 사운드, 이벤트 리소스로 확장하면 됩니다.
+            </div>
+        </section>
+
+        <section class="footer">
+            <h2>참고한 Unity 공식 문서</h2>
+            <ul>
+                <li><a href="https://docs.unity3d.com/Packages/com.unity.addressables%402.0/manual/get-started-remote-content.html">Unity Addressables 2.x - Remote content distribution</a></li>
+                <li><a href="https://docs.unity3d.com/Packages/com.unity.addressables%402.8/manual/builds-full-build.html">Unity Addressables 2.x - Create a content-only build</a></li>
+                <li><a href="https://docs.unity3d.com/kr/Packages/com.unity.addressables%401.21/manual/DownloadDependenciesAsync.html">Unity Addressables - DownloadDependenciesAsync / GetDownloadSizeAsync</a></li>
+                <li><a href="https://docs.unity3d.com/Packages/com.unity.addressables%401.22/manual/content-update-builds-overview.html">Unity Addressables - Content update builds overview</a></li>
+                <li><a href="https://docs.unity3d.com/Packages/com.unity.addressables%401.20/manual/AddressableAssetsProfiles.html">Unity Addressables - Profiles</a></li>
+            </ul>
+            <p class="note">작성 기준: Unity 6 계열에서도 적용되는 Addressables Remote 구조 중심. 실제 메뉴명과 패키지 UI는 사용하는 Addressables 패키지 버전에 따라 조금씩 다를 수 있습니다.</p>
+        </section>
+    </main>
+</body>
+</html>

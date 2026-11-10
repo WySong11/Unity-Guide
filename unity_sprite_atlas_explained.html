@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unity Sprite Atlas 쉽게 이해하기</title>
+  <style>
+    :root {
+      --bg: #f5f8ff;
+      --card: #ffffff;
+      --ink: #18243a;
+      --muted: #5e6b80;
+      --blue: #2563eb;
+      --blue2: #dbeafe;
+      --green: #16a34a;
+      --green2: #dcfce7;
+      --orange: #f97316;
+      --orange2: #ffedd5;
+      --red: #dc2626;
+      --red2: #fee2e2;
+      --purple: #7c3aed;
+      --purple2: #ede9fe;
+      --line: #d7dfef;
+      --shadow: 0 14px 35px rgba(24, 36, 58, 0.10);
+      --radius: 22px;
+      --mono: "Consolas", "Menlo", "Courier New", monospace;
+      --sans: "Pretendard", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,0.13), transparent 28rem),
+        radial-gradient(circle at top right, rgba(249,115,22,0.12), transparent 24rem),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.68;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 22px 80px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a, #1d4ed8 58%, #0ea5e9);
+      color: white;
+      border-radius: 30px;
+      padding: 44px 40px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      right: -120px;
+      top: -110px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.13);
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.08;
+      letter-spacing: -0.05em;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 0;
+      font-size: 19px;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.22);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    section {
+      margin-top: 30px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(215,223,239,0.9);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 30px;
+      letter-spacing: -0.04em;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    p { margin: 0 0 12px; }
+
+    .lead {
+      font-size: 18px;
+      color: #334155;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .mini-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .note {
+      border-left: 6px solid var(--blue);
+      background: var(--blue2);
+      padding: 16px 18px;
+      border-radius: 14px;
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    .warning {
+      border-left-color: var(--red);
+      background: var(--red2);
+      color: #991b1b;
+    }
+
+    .good {
+      border-left-color: var(--green);
+      background: var(--green2);
+      color: #166534;
+    }
+
+    .diagram {
+      background: #f8fbff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      overflow-x: auto;
+    }
+
+    .diagram-title {
+      display: inline-block;
+      margin-bottom: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #111827;
+      color: white;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .atlas-flow {
+      display: grid;
+      grid-template-columns: 1fr 90px 1.2fr;
+      gap: 16px;
+      align-items: center;
+      min-width: 860px;
+    }
+
+    .sprite-list {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .sprite-box {
+      background: white;
+      border: 2px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      min-height: 136px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sprite-box small {
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .icon {
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      border: 2px solid rgba(15,23,42,0.1);
+      font-size: 34px;
+      background: linear-gradient(180deg, #fff, #eef2ff);
+      box-shadow: inset 0 -8px 16px rgba(15,23,42,0.06);
+    }
+
+    .arrow {
+      text-align: center;
+      font-size: 48px;
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .atlas-sheet {
+      border: 4px solid var(--green);
+      border-radius: 20px;
+      padding: 20px;
+      background-color: #fff;
+      background-image:
+        linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
+        linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
+        linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
+      background-size: 26px 26px;
+      background-position: 0 0, 0 13px, 13px -13px, -13px 0px;
+    }
+
+    .atlas-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: 92px;
+      gap: 10px;
+      min-height: 210px;
+    }
+
+    .packed {
+      display: grid;
+      place-items: center;
+      border: 2px dashed rgba(22,163,74,0.45);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.74);
+      font-size: 38px;
+      font-weight: 900;
+    }
+
+    .packed.wide { grid-column: span 2; }
+    .packed.tall { grid-row: span 2; }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .compare-box {
+      border-radius: 20px;
+      padding: 20px;
+      border: 2px solid var(--line);
+      background: white;
+    }
+
+    .compare-box.bad { border-color: #fecaca; background: #fff7f7; }
+    .compare-box.ok { border-color: #bbf7d0; background: #f6fff8; }
+
+    .texture-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .texture-chip {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #fff;
+      padding: 8px 10px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      counter-reset: step;
+    }
+
+    .step {
+      position: relative;
+      min-height: 150px;
+      padding: 18px 12px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      text-align: center;
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      background: var(--orange);
+      color: white;
+      font-weight: 900;
+    }
+
+    .step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      color: var(--orange);
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .step .big {
+      display: block;
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      background: white;
+      font-size: 15px;
+    }
+
+    th, td {
+      padding: 14px 15px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      background: #0f172a;
+      color: white;
+      text-align: left;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    code {
+      font-family: var(--mono);
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+
+    .codebox {
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 18px;
+      border-radius: 16px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pill-list li {
+      padding: 9px 12px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      color: #312e81;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .callout-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .callout {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: white;
+      text-align: center;
+    }
+
+    .callout .emoji {
+      font-size: 38px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .footer {
+      margin-top: 34px;
+      padding: 20px 24px;
+      border-radius: 20px;
+      background: #111827;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    .footer strong { color: white; }
+
+    @media (max-width: 900px) {
+      .grid-2, .grid-3, .comparison, .callout-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .step:not(:last-child)::after { display: none; }
+      .hero { padding: 34px 24px; }
+      .card { padding: 22px; }
+    }
+
+    @media print {
+      body { background: white; }
+      .card, .hero { box-shadow: none; }
+      a { color: #000; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>Unity Sprite Atlas 쉽게 이해하기</h1>
+      <p>
+        Sprite Atlas는 여러 개의 Sprite 이미지를 하나의 큰 Texture로 묶어서, Unity가 더 효율적으로 그릴 수 있게 해주는 2D/ UI 최적화 기능입니다.
+      </p>
+      <div class="badge-row">
+        <span class="badge">🎮 2D 게임</span>
+        <span class="badge">🧩 UI 아이콘</span>
+        <span class="badge">📱 모바일 최적화</span>
+        <span class="badge">⚡ Draw Call 감소</span>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>1. Sprite Atlas란?</h2>
+      <p class="lead">
+        Unity에서 <strong>Sprite</strong>는 UI 아이콘, 캐릭터 이미지, 타일, 이펙트 조각처럼 2D로 그려지는 이미지입니다.
+        <strong>Sprite Atlas</strong>는 이런 Sprite들을 한 장의 큰 이미지판에 모아두는 기능입니다.
+      </p>
+      <div class="note">
+        한 줄로 말하면: <strong>여러 이미지를 한 장에 묶어서, GPU가 이미지를 덜 바꾸고 더 효율적으로 그리게 하는 기능</strong>입니다.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. 그림으로 보는 Atlas 개념</h2>
+      <div class="diagram">
+        <span class="diagram-title">개별 Sprite → 하나의 Sprite Atlas</span>
+        <div class="atlas-flow">
+          <div>
+            <h3 style="margin-top:0">Atlas 사용 전</h3>
+            <div class="sprite-list">
+              <div class="sprite-box"><strong>저장</strong><div class="icon">💾</div><small>save.png</small></div>
+              <div class="sprite-box"><strong>불러오기</strong><div class="icon">📁</div><small>load.png</small></div>
+              <div class="sprite-box"><strong>삭제</strong><div class="icon">🗑️</div><small>delete.png</small></div>
+              <div class="sprite-box"><strong>보상</strong><div class="icon">⭐</div><small>star.png</small></div>
+              <div class="sprite-box"><strong>버튼</strong><div class="icon">🔵</div><small>button.png</small></div>
+            </div>
+            <div class="texture-row">
+              <span class="texture-chip">Texture 1</span>
+              <span class="texture-chip">Texture 2</span>
+              <span class="texture-chip">Texture 3</span>
+              <span class="texture-chip">Texture 4</span>
+              <span class="texture-chip">Texture 5</span>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div>
+            <h3 style="margin-top:0">Atlas 사용 후</h3>
+            <div class="atlas-sheet">
+              <div class="atlas-grid">
+                <div class="packed tall">💾</div>
+                <div class="packed wide">📁</div>
+                <div class="packed">⭐</div>
+                <div class="packed">🗑️</div>
+                <div class="packed wide">🔵</div>
+                <div class="packed">🎾</div>
+              </div>
+            </div>
+            <div class="texture-row">
+              <span class="texture-chip">UI_Common_Atlas.spriteatlasv2</span>
+              <span class="texture-chip">큰 Texture 1장</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3. Atlas를 쓰면 왜 빨라질까?</h2>
+      <div class="comparison">
+        <div class="compare-box bad">
+          <h3 style="margin-top:0">❌ Atlas를 사용하지 않을 때</h3>
+          <p>UI에 저장, 불러오기, 삭제, 별, 버튼 이미지가 각각 따로 있으면 Unity는 여러 Texture를 계속 바꿔가며 그려야 합니다.</p>
+          <div class="codebox">save.png 사용 → 그리기
+load.png 사용 → 그리기
+delete.png 사용 → 그리기
+star.png 사용 → 그리기
+button.png 사용 → 그리기
+
+결과: Texture 전환 증가, Draw Call 증가 가능</div>
+        </div>
+        <div class="compare-box ok">
+          <h3 style="margin-top:0">✅ Atlas를 사용할 때</h3>
+          <p>여러 Sprite가 같은 Atlas Texture 안에 들어 있으면 Unity는 같은 Texture를 공유하면서 더 잘 묶어서 그릴 수 있습니다.</p>
+          <div class="codebox">UI_Common_Atlas 사용
+  ├─ save 영역만 잘라서 사용
+  ├─ load 영역만 잘라서 사용
+  ├─ delete 영역만 잘라서 사용
+  ├─ star 영역만 잘라서 사용
+  └─ button 영역만 잘라서 사용
+
+결과: Batching에 유리, Draw Call 감소 가능</div>
+        </div>
+      </div>
+      <p style="margin-top:16px">
+        Unity 공식 문서에서도 Sprite Atlas는 여러 Sprite Texture를 하나의 Atlas Texture로 패킹하는 유틸리티로 설명됩니다.
+        Atlas 안의 Sprite들은 같은 큰 Texture의 일부 영역을 잘라 쓰는 방식으로 이해하면 됩니다.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>4. Sprite Sheet와 Sprite Atlas의 차이</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>Sprite Sheet</th>
+            <th>Sprite Atlas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>주 목적</strong></td>
+            <td>애니메이션 프레임을 한 이미지에 모아 관리</td>
+            <td>여러 Sprite를 묶어서 렌더링 최적화</td>
+          </tr>
+          <tr>
+            <td><strong>예시</strong></td>
+            <td>캐릭터 걷기 1, 2, 3, 4 프레임</td>
+            <td>Save, Load, Delete, Ranking, History 아이콘</td>
+          </tr>
+          <tr>
+            <td><strong>제작 방식</strong></td>
+            <td>보통 이미지 한 장을 직접 만들고 Slice</td>
+            <td>Unity가 여러 Sprite를 자동으로 Packing</td>
+          </tr>
+          <tr>
+            <td><strong>초보자 기억법</strong></td>
+            <td>애니메이션용 이미지 묶음</td>
+            <td>성능 최적화용 이미지 묶음</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>5. Unity에서 Sprite Atlas 만드는 흐름</h2>
+      <div class="steps">
+        <div class="step"><span class="big">🖼️</span><strong>Sprite 준비</strong><br />아이콘, 버튼, 배지 PNG를 준비합니다.</div>
+        <div class="step"><span class="big">📦</span><strong>Atlas 생성</strong><br /><code>Assets &gt; Create &gt; 2D &gt; Sprite Atlas</code></div>
+        <div class="step"><span class="big">➕</span><strong>Sprite 추가</strong><br />Objects for Packing에 Sprite나 폴더를 넣습니다.</div>
+        <div class="step"><span class="big">👀</span><strong>Pack Preview</strong><br />어떻게 묶였는지 미리 확인합니다.</div>
+        <div class="step"><span class="big">🎮</span><strong>게임에서 사용</strong><br />기존 Sprite를 UI Image나 SpriteRenderer에서 그대로 사용합니다.</div>
+      </div>
+      <div class="note good" style="margin-top:18px">
+        Atlas를 만들었다고 Sprite를 코드에서 특별히 다른 방식으로 불러야 하는 것은 아닙니다. 보통은 기존 Sprite를 그대로 사용하면 Unity가 빌드/실행 과정에서 Atlas를 연결해줍니다.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>6. Inspector 주요 옵션 쉽게 보기</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>옵션</th>
+            <th>쉬운 설명</th>
+            <th>추천</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Include in Build</strong></td>
+            <td>이 Atlas를 빌드에 포함할지 정합니다.</td>
+            <td>일반 UI/2D Sprite는 켜기</td>
+          </tr>
+          <tr>
+            <td><strong>Allow Rotation</strong></td>
+            <td>공간을 아끼려고 Sprite를 회전해서 넣을 수 있게 합니다.</td>
+            <td>UI용 Atlas는 끄기 권장</td>
+          </tr>
+          <tr>
+            <td><strong>Tight Packing</strong></td>
+            <td>Sprite의 실제 모양에 맞춰 더 촘촘하게 넣습니다.</td>
+            <td>아이콘은 가능, 버튼/패널/9-Slice는 끄기 권장</td>
+          </tr>
+          <tr>
+            <td><strong>Padding</strong></td>
+            <td>Sprite와 Sprite 사이의 여백입니다. 여백이 너무 작으면 옆 이미지 색이 번져 보일 수 있습니다.</td>
+            <td>보통 4 이상, 번짐 있으면 8</td>
+          </tr>
+          <tr>
+            <td><strong>Read/Write</strong></td>
+            <td>스크립트에서 Texture 픽셀을 읽거나 수정할 수 있게 합니다.</td>
+            <td>일반적으로 끄기</td>
+          </tr>
+          <tr>
+            <td><strong>Filter Mode</strong></td>
+            <td>이미지가 확대/축소될 때 보이는 방식을 정합니다.</td>
+            <td>픽셀아트는 Point, 일반 UI는 Bilinear</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note warning" style="margin-top:18px">
+        UI 이미지가 이상하게 회전되어 보이거나, 버튼/패널 테두리가 잘린다면 <strong>Allow Rotation</strong>과 <strong>Tight Packing</strong>을 먼저 꺼보는 것이 좋습니다.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>7. UI 프로젝트에서 추천 Atlas 분리 방식</h2>
+      <p class="lead">
+        모든 이미지를 Atlas 하나에 전부 넣는 것보다, <strong>같이 자주 쓰이는 이미지끼리</strong> 나누는 편이 관리하기 쉽습니다.
+      </p>
+      <div class="grid-3">
+        <div class="mini-card">
+          <strong>UI_ButtonIcons_Atlas</strong>
+          <p>Save, Load, Delete, Select, Reset, Draw, Ranking, History 같은 버튼 아이콘</p>
+        </div>
+        <div class="mini-card">
+          <strong>UI_Badges_Atlas</strong>
+          <p>ALL, A, B, C, D 그룹 배지나 등급 아이콘</p>
+        </div>
+        <div class="mini-card">
+          <strong>UI_NumberIcons_Atlas</strong>
+          <p>0~9 숫자 아이콘, 점수 선택 UI에 쓰는 숫자 Sprite</p>
+        </div>
+      </div>
+      <div class="codebox" style="margin-top:18px">Assets/
+ └─ Sprites/
+     ├─ UI/
+     │   ├─ Icons/
+     │   ├─ Buttons/
+     │   ├─ Badges/
+     │   └─ Numbers/
+     └─ Atlases/
+         ├─ UI_ButtonIcons_Atlas.spriteatlasv2
+         ├─ UI_Badges_Atlas.spriteatlasv2
+         └─ UI_NumberIcons_Atlas.spriteatlasv2</div>
+    </section>
+
+    <section class="card">
+      <h2>8. 초보자가 자주 하는 실수</h2>
+      <div class="callout-grid">
+        <div class="callout"><span class="emoji">⚠️</span><strong>같은 Sprite를 여러 Atlas에 넣음</strong><br />어느 Atlas를 쓸지 관리가 꼬일 수 있습니다.</div>
+        <div class="callout"><span class="emoji">🧱</span><strong>하나의 Atlas에 전부 넣음</strong><br />작은 UI 하나만 필요한데 큰 Atlas가 로드될 수 있습니다.</div>
+        <div class="callout"><span class="emoji">🔄</span><strong>UI용 Rotation 켜둠</strong><br />UI Sprite가 회전되어 보이는 문제가 생길 수 있습니다.</div>
+        <div class="callout"><span class="emoji">📏</span><strong>Padding 너무 작음</strong><br />인접 Sprite 색이 가장자리에 번져 보일 수 있습니다.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>9. 최종 요약</h2>
+      <ul class="pill-list">
+        <li>Sprite Atlas = 여러 Sprite를 큰 Texture 한 장에 묶는 기능</li>
+        <li>목적 = Draw Call 감소와 렌더링 최적화</li>
+        <li>UI용 Atlas = Allow Rotation 끄기 권장</li>
+        <li>Padding = 보통 4 이상</li>
+        <li>Read/Write = 특별한 이유 없으면 끄기</li>
+        <li>같이 쓰는 이미지끼리 Atlas를 나누기</li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      <strong>참고 자료</strong><br />
+      Unity Manual: Sprite Atlas reference, Sprite Atlas workflow, Atlas packing settings. 문서 내용은 Unity 6 및 Unity 2022/2023 계열의 Sprite Atlas 설명을 기준으로 정리했습니다.<br />
+      <a href="https://docs.unity.cn/6000.0/Documentation/Manual/sprite/atlas/sprite-atlas-reference.html" target="_blank">Unity 6 Sprite Atlas reference</a> ·
+      <a href="https://docs.unity3d.com/kr/2022.3/Manual/class-SpriteAtlas.html" target="_blank">Unity 2022.3 Sprite Atlas 프로퍼티 레퍼런스</a>
+    </footer>
+  </main>
+</body>
+</html>
