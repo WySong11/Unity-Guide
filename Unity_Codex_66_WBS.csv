@@ -1,0 +1,6 @@
+﻿ID,Phase,Task,DependsOn,EstimatedTimeMin(ExampleOnly),AllowedScope,AcceptanceCriteria,Status
+T01,0 Survey,요구 및 코드 구조 조사,,20,ReadOnly,R01~R04·관련 파일·미정 목록,NOT STARTED
+T02,1 Data,ItemData/Catalog/ID 검증,T01,25,Inventory/Data,빈 ID·중복 ID 거절,NOT STARTED
+T03,2 Domain,Inventory stack/Add/Remove,T02,40,Inventory/Core,"4+3=>5/2, 공간 부족 잔여 반환",NOT STARTED
+T04,2 Integration,Pickup/UI 이벤트 연동,T03,45,Inventory/UI,획득 시 UI 갱신·중복 구독 없음,NOT STARTED
+T05,3 Save,JSON DTO 저장·복원,T03;T04,45,Inventory/Save,무효·손상 데이터 거부·복원,NOT STARTED

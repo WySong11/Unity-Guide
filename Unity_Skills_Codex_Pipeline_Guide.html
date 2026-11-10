@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unity Skills + Codex + Unity CLI + Pipeline 사용 가이드</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --warn: #f59e0b;
+      --border: #334155;
+      --code: #020617;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+      background: linear-gradient(180deg, #0b1120 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.75;
+    }
+    .container {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+    header {
+      background: linear-gradient(135deg, rgba(56,189,248,.15), rgba(34,197,94,.10));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 34px;
+      margin-bottom: 24px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
+    }
+    h1 { margin: 0 0 10px; font-size: 2.15rem; line-height: 1.25; }
+    h2 {
+      margin-top: 46px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 1.55rem;
+      color: #f8fafc;
+    }
+    h3 { margin-top: 28px; color: #cbd5e1; }
+    p { margin: 12px 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .subtitle { color: var(--muted); font-size: 1.02rem; }
+    .toc, .card, .note, .warn, .good {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(17,24,39,.85);
+      padding: 20px;
+      margin: 18px 0;
+    }
+    .toc ul { columns: 2; gap: 34px; padding-left: 20px; }
+    .toc li { margin: 7px 0; break-inside: avoid; }
+    .note { border-left: 4px solid var(--accent); }
+    .good { border-left: 4px solid var(--accent2); }
+    .warn { border-left: 4px solid var(--warn); }
+    .lead {
+      font-size: 1.08rem;
+      color: #dbeafe;
+    }
+    .diagram, pre {
+      background: var(--code);
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 18px;
+      overflow-x: auto;
+      white-space: pre;
+      color: #e2e8f0;
+      font-family: Consolas, "Cascadia Code", monospace;
+      font-size: .94rem;
+    }
+    code {
+      font-family: Consolas, "Cascadia Code", monospace;
+      background: #0b1220;
+      color: #bae6fd;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #162033;
+      color: #f8fafc;
+    }
+    tr:nth-child(even) td { background: rgba(30,41,59,.35); }
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .step {
+      position: relative;
+      padding: 18px 18px 18px 58px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(15,23,42,.72);
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 16px;
+      top: 17px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #082f49;
+      font-weight: 800;
+    }
+    .tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin: 2px 4px 2px 0;
+      font-size: .82rem;
+      background: #172554;
+      color: #bfdbfe;
+      border: 1px solid #1d4ed8;
+    }
+    footer {
+      margin-top: 54px;
+      color: var(--muted);
+      text-align: center;
+      font-size: .92rem;
+    }
+    @media (max-width: 760px) {
+      .toc ul { columns: 1; }
+      h1 { font-size: 1.65rem; }
+      .container { width: min(100% - 22px, 1180px); }
+      header { padding: 24px; }
+      table { font-size: .92rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Unity Skills + Codex + Unity CLI + Pipeline 사용 가이드</h1>
+      <p class="subtitle">Unity-Technologies/skills를 실제 Unity 프로젝트에서 쉽고 안전하게 활용하기 위한 정리본</p>
+      <p class="lead">
+        핵심 개념은 간단합니다. <strong>Unity Skills는 Codex에게 Unity 작업 방법을 알려주는 전문 매뉴얼</strong>이고,
+        <strong>Unity CLI + MCP + Pipeline은 Codex가 실제 Unity Editor를 조작할 수 있게 해주는 실행 도구</strong>입니다.
+      </p>
+    </header>
+
+    <section class="toc">
+      <strong>목차</strong>
+      <ul>
+        <li><a href="#overview">1. 전체 구조 이해</a></li>
+        <li><a href="#inside">2. ZIP 내부 구조</a></li>
+        <li><a href="#skills">3. 주요 Skill 분류</a></li>
+        <li><a href="#recommended">4. 우선 추천 Skill</a></li>
+        <li><a href="#examples">5. Skill별 실제 활용 예시</a></li>
+        <li><a href="#install">6. 설치 방법</a></li>
+        <li><a href="#pipeline">7. Pipeline / MCP 연결</a></li>
+        <li><a href="#prompts">8. Codex 요청 예시</a></li>
+        <li><a href="#agents">9. AGENTS.md와 Skill 역할 구분</a></li>
+        <li><a href="#workflow">10. 추천 작업 방식</a></li>
+        <li><a href="#final">11. 최종 실행 순서</a></li>
+      </ul>
+    </section>
+
+    <section id="overview">
+      <h2>1. 전체 구조 이해</h2>
+      <div class="diagram">Codex
+  │
+  ├─ Unity Skills
+  │    └─ "어떻게 작업해야 하는가?"
+  │
+  ├─ AGENTS.md
+  │    └─ "이 프로젝트에서는 어떤 규칙을 지켜야 하는가?"
+  │
+  ▼
+Unity CLI
+  │
+  ▼
+MCP
+  │
+  ▼
+com.unity.pipeline
+  │
+  ▼
+Unity Editor
+  ├─ Scene
+  ├─ GameObject
+  ├─ Prefab
+  ├─ UI
+  ├─ Asset
+  └─ C# 실행</div>
+
+      <table>
+        <thead><tr><th>구성</th><th>역할</th></tr></thead>
+        <tbody>
+          <tr><td>Codex</td><td>실제 작업을 수행하는 AI 개발자</td></tr>
+          <tr><td>Unity Skills</td><td>Unity 기능별 전문 작업 지침</td></tr>
+          <tr><td>Unity CLI</td><td>터미널에서 Unity 설치/프로젝트/Editor를 제어</td></tr>
+          <tr><td>MCP</td><td>Codex가 Unity CLI 기능을 Tool처럼 호출하게 연결</td></tr>
+          <tr><td>com.unity.pipeline</td><td>Unity CLI와 실행 중인 Unity Editor를 연결</td></tr>
+          <tr><td>AGENTS.md</td><td>현재 프로젝트만의 개발 규칙과 네이밍 규칙</td></tr>
+        </tbody>
+      </table>
+
+      <div class="good">
+        <strong>한 줄 요약:</strong> Skill은 지식, Pipeline/MCP는 실제 조작 능력입니다.
+      </div>
+    </section>
+
+    <section id="inside">
+      <h2>2. ZIP 내부 구조</h2>
+      <p>압축 파일은 단순 프롬프트 모음이 아니라, 각 Skill별로 작업 지침과 참고 자료가 함께 들어 있는 구조입니다.</p>
+      <pre><code>skills-main
+├─ README.md
+├─ CONTRIBUTING.md
+└─ skills
+   ├─ unity-cli
+   │  ├─ SKILL.md
+   │  └─ references
+   ├─ ui
+   │  └─ SKILL.md
+   ├─ ui-ugui
+   │  ├─ SKILL.md
+   │  └─ references
+   ├─ urp-postprocessing
+   ├─ initialize-ai-navigation
+   ├─ setup-multiplayer-services
+   ├─ localization
+   └─ ...</code></pre>
+
+      <div class="note">
+        가장 중요한 파일은 <code>SKILL.md</code>입니다. Codex는 이 파일의 규칙을 읽고
+        "무엇을 먼저 확인해야 하는지", "어떤 API를 써야 하는지", "어떤 실수를 피해야 하는지"를 판단합니다.
+      </div>
+    </section>
+
+    <section id="skills">
+      <h2>3. 주요 Skill 분류</h2>
+      <table>
+        <thead><tr><th>분야</th><th>Skill</th><th>용도</th></tr></thead>
+        <tbody>
+          <tr><td>기본</td><td>unity-cli</td><td>Unity CLI 및 Editor 제어</td></tr>
+          <tr><td>기본</td><td>new-unity-project</td><td>새 Unity 프로젝트 생성 흐름</td></tr>
+          <tr><td>기본</td><td>unity-package-management</td><td>UPM 패키지 추가/삭제/업데이트</td></tr>
+          <tr><td>UI</td><td>ui</td><td>UI 시스템 자동 판단 및 라우팅</td></tr>
+          <tr><td>UI</td><td>ui-ugui</td><td>Canvas / RectTransform / LayoutGroup 기반 UI</td></tr>
+          <tr><td>UI</td><td>ui-uitk</td><td>UI Toolkit / UXML / USS</td></tr>
+          <tr><td>UI</td><td>ui-imgui</td><td>EditorWindow / Inspector / PropertyDrawer</td></tr>
+          <tr><td>텍스트</td><td>optimize-text-mesh-pro</td><td>TMP 폰트, CJK, Atlas, Fallback 최적화</td></tr>
+          <tr><td>렌더링</td><td>urp-postprocessing</td><td>Global Volume / Bloom / ColorAdjustments</td></tr>
+          <tr><td>렌더링</td><td>migrate-birp-to-urp</td><td>Built-in → URP 전환</td></tr>
+          <tr><td>렌더링</td><td>validate-urp-render-graph-renderer-feature</td><td>Unity 6 Render Graph 검사</td></tr>
+          <tr><td>Shader</td><td>shader-graph-create-custom-node</td><td>Shader Graph HLSL Custom Node</td></tr>
+          <tr><td>AI</td><td>initialize-ai-navigation</td><td>NavMesh / Agent / Obstacle / Link</td></tr>
+          <tr><td>Physics</td><td>physics-3d-collision</td><td>Collider / Rigidbody / Trigger 문제 분석</td></tr>
+          <tr><td>Network</td><td>setup-multiplayer-services</td><td>세션 / 방 / 매치메이킹</td></tr>
+          <tr><td>Network</td><td>setup-vivox-voice-chat</td><td>음성/텍스트 채팅</td></tr>
+          <tr><td>UGS</td><td>build-live-game</td><td>Cloud Save / Cloud Code / Economy 등</td></tr>
+          <tr><td>결제</td><td>implement-in-app-purchases</td><td>Unity IAP</td></tr>
+          <tr><td>광고</td><td>levelplay-unity-integration</td><td>LevelPlay 광고</td></tr>
+          <tr><td>다국어</td><td>localization</td><td>Localization / CJK</td></tr>
+          <tr><td>2D</td><td>2d-pixel-perfect</td><td>Pixel Perfect</td></tr>
+          <tr><td>2D</td><td>sprite-editor</td><td>Sprite slicing / pivot / border</td></tr>
+          <tr><td>최적화</td><td>manage-sprite-atlas</td><td>Sprite Atlas 관리</td></tr>
+          <tr><td>최적화</td><td>optimize-audio</td><td>Audio 메모리 / CPU 최적화</td></tr>
+          <tr><td>최적화</td><td>audio-setup-mixers</td><td>AudioMixer 구성</td></tr>
+          <tr><td>최적화</td><td>optimize-web</td><td>WebGL / WebGPU 최적화</td></tr>
+          <tr><td>검색</td><td>generate-editor-search-query</td><td>Unity Search Query 작성</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="recommended">
+      <h2>4. 우선 추천 Skill</h2>
+      <p>처음부터 모든 Skill을 쓸 필요는 없습니다. 일반적인 Unity 6 프로젝트라면 다음 순서가 좋습니다.</p>
+
+      <div class="card">
+        <strong>1순위</strong><br />
+        <span class="tag">unity-cli</span>
+        <span class="tag">ui</span>
+        <span class="tag">ui-ugui</span>
+        <span class="tag">unity-package-management</span>
+      </div>
+
+      <div class="card">
+        <strong>2순위</strong><br />
+        <span class="tag">urp-postprocessing</span>
+        <span class="tag">initialize-ai-navigation</span>
+        <span class="tag">physics-3d-collision</span>
+        <span class="tag">optimize-text-mesh-pro</span>
+      </div>
+
+      <div class="card">
+        <strong>네트워크 프로젝트</strong><br />
+        <span class="tag">setup-multiplayer-services</span>
+        <span class="tag">setup-vivox-voice-chat</span>
+        <span class="tag">build-live-game</span>
+      </div>
+    </section>
+
+    <section id="examples">
+      <h2>5. Skill별 실제 활용 예시</h2>
+
+      <h3>ui / ui-ugui</h3>
+      <p><code>ui</code>는 Router 역할을 합니다. Canvas/RectTransform이 보이면 <code>ui-ugui</code>,
+      UIDocument/UXML이면 <code>ui-uitk</code>, OnGUI 기반이면 <code>ui-imgui</code>로 연결합니다.</p>
+
+      <div class="note">
+        <strong>장점:</strong> 기존 Canvas를 통째로 다시 만드는 대신, Hierarchy와 LayoutGroup을 먼저 확인한 뒤
+        문제가 있는 부분만 최소 수정하도록 유도합니다.
+      </div>
+
+      <h3>physics-3d-collision</h3>
+      <p>단순히 Collider만 보지 않고 Rigidbody, Kinematic, Layer Collision Matrix, CharacterController 여부까지 함께 검사합니다.</p>
+      <pre><code>// CharacterController 사용 시
+void OnControllerColliderHit(ControllerColliderHit hit)
+{
+}</code></pre>
+
+      <h3>initialize-ai-navigation</h3>
+      <div class="diagram">NavMeshSurface
+    ↓
+Bake 상태
+    ↓
+NavMeshAgent
+    ↓
+NavMeshObstacle
+    ↓
+NavMeshLink / Modifier
+    ↓
+AI Movement Script</div>
+
+      <h3>urp-postprocessing</h3>
+      <div class="diagram">URP 활성화?
+ ↓
+HDR?
+ ↓
+Camera Post Processing?
+ ↓
+Volume Layer Mask?
+ ↓
+Global Volume?
+ ↓
+Volume Profile?
+ ↓
+Override State?
+ ↓
+Bloom / ColorAdjustments 활성화?</div>
+      <pre><code>overrideState = true;</code></pre>
+
+      <h3>optimize-text-mesh-pro</h3>
+      <div class="diagram">Main Font
+   ↓
+Fallback CJK Font
+   ↓
+Fallback Symbol Font</div>
+      <p>한글/일본어/중국어 프로젝트에서 Static/Dynamic Font, Atlas, Fallback, AutoSize까지 함께 점검하는 데 유용합니다.</p>
+    </section>
+
+    <section id="install">
+      <h2>6. 설치 방법</h2>
+      <p>프로젝트 루트에서 PowerShell을 여는 것을 권장합니다.</p>
+      <pre><code>cd D:\Dev\GitHub\Unity_Class\LectureNetwork</code></pre>
+
+      <p>Unity Skills 설치:</p>
+      <pre><code>npx skills add Unity-Technologies/skills</code></pre>
+
+      <p>Codex를 명확히 지정하고 싶다면:</p>
+      <pre><code>npx skills add Unity-Technologies/skills --agent codex</code></pre>
+
+      <p>설치 후 프로젝트에 다음과 같은 구조가 생기는지 확인합니다.</p>
+      <pre><code>.agents
+└─ skills
+   ├─ unity-cli
+   ├─ ui
+   ├─ ui-ugui
+   └─ ...</code></pre>
+    </section>
+
+    <section id="pipeline">
+      <h2>7. Pipeline / MCP 연결</h2>
+
+      <p>Skill은 지식이고, 실제 Unity Editor를 만지려면 Pipeline/MCP가 필요합니다.</p>
+
+      <div class="steps">
+        <div class="step">
+          <strong>Pipeline 설치</strong>
+          <pre><code>unity pipeline install</code></pre>
+        </div>
+        <div class="step">
+          <strong>Pipeline 상태 확인</strong>
+          <pre><code>unity pipeline list</code></pre>
+        </div>
+        <div class="step">
+          <strong>Codex용 Unity CLI Skill 설치</strong>
+          <pre><code>unity skill install codex --local</code></pre>
+        </div>
+        <div class="step">
+          <strong>Codex에 MCP 연결</strong>
+          <pre><code>unity mcp configure codex --local</code></pre>
+        </div>
+        <div class="step">
+          <strong>Unity Editor 실행 후 연결 확인</strong>
+          <pre><code>unity status</code></pre>
+        </div>
+        <div class="step">
+          <strong>Editor가 제공하는 명령 확인</strong>
+          <pre><code>unity command</code></pre>
+        </div>
+      </div>
+
+      <div class="warn">
+        Pipeline이 설치되어 있어도 Unity Editor가 실행 중이 아니면 실제 Scene/GameObject 조작은 할 수 없습니다.
+      </div>
+
+      <p><code>eval</code>이 제공되는 경우 Unity Editor 안에서 C#을 직접 실행할 수도 있습니다.</p>
+      <pre><code>new UnityEngine.GameObject("TestObject");</code></pre>
+    </section>
+
+    <section id="prompts">
+      <h2>8. Codex 요청 예시</h2>
+
+      <h3>UI 생성</h3>
+      <pre><code>현재 Unity Editor에 연결해서
+현재 Scene과 Canvas 구조를 먼저 분석해줘.
+
+uGUI를 사용하고 있는지 확인하고,
+기존 UI 구조와 네이밍 규칙을 유지해.
+
+Canvas 아래에 LoginPanel을 만들어줘.
+
+LoginPanel에는
+- ID TMP_InputField
+- Password TMP_InputField
+- Login Button
+- Message TMP_Text
+
+를 배치해.
+
+Canvas에 직접 생성하고
+Prefab으로 새로 만들지는 마.
+
+기존 UI는 삭제하거나 재생성하지 말고
+필요한 부분만 추가해.
+
+작업 후 실제 Hierarchy를 다시 확인해서
+생성 결과를 알려줘.</code></pre>
+
+      <h3>NavMesh 설정</h3>
+      <pre><code>현재 Scene의 Navigation 설정을 먼저 분석해줘.
+
+NavMeshSurface,
+NavMeshAgent,
+NavMeshObstacle이 있는지 확인해.
+
+Monster가 Player를 추적할 수 있도록
+AI Navigation을 구성해줘.
+
+기존 Navigation 설정이 있다면
+새로 만들지 말고 재사용해.
+
+필요한 부분만 추가한 다음
+Agent Type과 Bake 상태까지 확인해줘.</code></pre>
+
+      <h3>Global Volume 점검</h3>
+      <pre><code>현재 URP Global Volume이
+정상적으로 작동하는지 검사해줘.
+
+다음을 순서대로 확인해.
+1. URP 활성화
+2. HDR
+3. Camera Post Processing
+4. Volume Layer Mask
+5. Global Volume
+6. Volume Profile
+7. overrideState
+8. Bloom
+9. ColorAdjustments
+
+Pipeline의 eval을 사용할 수 있다면
+Unity Editor 내부에서 직접 검사해.
+
+문제가 있으면 전체 Volume을 다시 만들지 말고
+잘못된 설정만 수정해.</code></pre>
+
+      <h3>Multiplayer 구조 설계</h3>
+      <pre><code>Unity Multiplayer Services를 이용해서
+4명이 참여하는 방 시스템을 만들어줘.
+
+흐름은
+Launcher
+→ Login
+→ Lobby
+→ Create Room / Join Room
+→ Game
+
+으로 사용하려고 해.
+
+현재 프로젝트와 설치된 패키지를 먼저 분석해서
+필요한 Multiplayer 구조를 설계해줘.
+
+최신 Multiplayer Sessions 방식으로 구성하고
+불필요한 서비스를 따로 추가하지 마.</code></pre>
+    </section>
+
+    <section id="agents">
+      <h2>9. AGENTS.md와 Skill 역할 구분</h2>
+      <table>
+        <thead><tr><th>항목</th><th>적합한 내용</th></tr></thead>
+        <tbody>
+          <tr><td>Unity Skills</td><td>Unity 기능 자체의 전문 지식과 권장 작업 순서</td></tr>
+          <tr><td>AGENTS.md</td><td>현재 프로젝트에서만 지켜야 하는 팀 규칙/네이밍/폴더/작업 정책</td></tr>
+        </tbody>
+      </table>
+
+      <p>예를 들어 AGENTS.md에는 다음과 같은 내용을 넣는 것이 좋습니다.</p>
+      <pre><code>Unity 6000.3.x 사용
+
+모든 UI Text는 TMP 사용
+
+UI 스크립트 네이밍:
+XXXPanelUI
+XXXWindowUI
+
+Canvas의 UI는 실행 시 생성하지 않고
+Scene에 직접 배치
+
+기존 Prefab 임의 삭제 금지
+
+작업 전 기존 구조 분석
+
+작업 완료 후 History 기록</code></pre>
+    </section>
+
+    <section id="workflow">
+      <h2>10. 추천 작업 방식</h2>
+      <div class="warn">
+        Skill이 있다고 해서 "게임 전체를 한 번에 만들어줘"가 가장 좋은 사용법은 아닙니다.
+        Unity 작업은 작은 단위로 나누고 매 단계 검증하는 것이 훨씬 안정적입니다.
+      </div>
+
+      <div class="diagram">1단계: 현재 프로젝트 분석
+        ↓
+2단계: 한 기능만 구현
+        ↓
+3단계: Unity Editor에서 실제 검증
+        ↓
+4단계: 문제 수정
+        ↓
+5단계: 다음 기능 진행</div>
+
+      <p>예:</p>
+      <pre><code>1단계:
+현재 프로젝트와 설치 패키지를 분석해줘.
+코드는 수정하지 마.
+
+2단계:
+로그인 구조만 구현해줘.
+작업 후 테스트해.
+
+3단계:
+Lobby UI만 만들어줘.
+
+4단계:
+Create Room 기능을 연결해줘.</code></pre>
+    </section>
+
+    <section id="final">
+      <h2>11. 최종 실행 순서</h2>
+
+      <div class="steps">
+        <div class="step">Unity 프로젝트 폴더로 이동</div>
+        <div class="step">Unity Skills 설치</div>
+        <div class="step">Pipeline 상태 확인</div>
+        <div class="step">Codex용 unity-cli Skill 설치</div>
+        <div class="step">MCP 연결</div>
+        <div class="step">Unity Editor 실행</div>
+        <div class="step"><code>unity status</code> 확인</div>
+        <div class="step"><code>unity command</code> 확인</div>
+        <div class="step">Codex에서 현재 상태 분석 요청</div>
+      </div>
+
+      <pre><code>cd D:\Dev\GitHub\Unity_Class\LectureNetwork
+
+npx skills add Unity-Technologies/skills
+
+unity pipeline list
+
+unity skill install codex --local
+
+unity mcp configure codex --local
+
+unity status
+
+unity command</code></pre>
+
+      <div class="good">
+        <strong>첫 테스트 추천:</strong><br /><br />
+        현재 실행 중인 Unity Editor와 연결해.<br />
+        현재 열린 프로젝트 이름과 Unity 버전을 확인하고,<br />
+        현재 Scene 이름과 Hierarchy 구조를 분석해줘.<br /><br />
+        아직 아무 파일이나 GameObject도 수정하지 말고,<br />
+        현재 상태만 보고해줘.
+      </div>
+
+      <p>이 테스트가 성공하면 다음으로 UI, Volume, NavMesh, Multiplayer 같은 기능을 Skill별로 단계적으로 적용하면 됩니다.</p>
+    </section>
+
+    <footer>
+      Unity Skills + Codex + Unity CLI + Pipeline 실전 사용 가이드
+    </footer>
+  </main>
+</body>
+</html>

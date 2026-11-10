@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unity Netcode 쉽게 이해하기</title>
+<style>
+  :root{
+    --bg:#f4f8ff;
+    --card:#ffffff;
+    --ink:#122033;
+    --muted:#5d6b80;
+    --blue:#2563eb;
+    --blue2:#1d4ed8;
+    --cyan:#06b6d4;
+    --teal:#0f9f8f;
+    --green:#16a34a;
+    --yellow:#facc15;
+    --orange:#f97316;
+    --red:#ef4444;
+    --purple:#7c3aed;
+    --line:#d9e6fb;
+    --shadow:0 18px 40px rgba(37,99,235,.12);
+    --radius:24px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Pretendard", "Noto Sans KR", "Segoe UI", Arial, sans-serif;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(37,99,235,.12), transparent 32rem),
+      radial-gradient(circle at 90% 10%, rgba(6,182,212,.13), transparent 30rem),
+      linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+    color:var(--ink);
+    line-height:1.65;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:34px 22px 70px}
+  .hero{
+    background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 56%,#0891b2 100%);
+    color:#fff;
+    border-radius:32px;
+    padding:38px 42px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero:before{
+    content:"";
+    position:absolute;inset:-120px -90px auto auto;width:360px;height:360px;
+    background:radial-gradient(circle, rgba(255,255,255,.22), transparent 65%);
+    border-radius:50%;
+  }
+  .hero h1{font-size:clamp(34px,5vw,64px);line-height:1.05;margin:0 0 14px;font-weight:900;letter-spacing:-.05em}
+  .hero p{font-size:clamp(17px,2vw,23px);margin:0;color:#dbeafe;max-width:900px}
+  .badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:8px 13px;border-radius:999px;font-weight:700;color:#eff6ff}
+  .section{
+    background:rgba(255,255,255,.88);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px;
+    margin-top:24px;
+    box-shadow:0 10px 28px rgba(15,23,42,.06);
+  }
+  .section h2{
+    margin:0 0 14px;
+    font-size:clamp(24px,3vw,36px);
+    letter-spacing:-.04em;
+    line-height:1.22;
+  }
+  .lead{font-size:20px;color:#334155;margin:0 0 20px}
+  .highlight{
+    background:linear-gradient(90deg, #fff7ed, #fffbeb);
+    border:1px solid #fed7aa;
+    border-left:8px solid var(--orange);
+    border-radius:18px;
+    padding:18px 20px;
+    font-size:19px;
+    font-weight:800;
+  }
+  .grid{display:grid;gap:18px}
+  .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid.six{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 8px 18px rgba(2,6,23,.04);
+  }
+  .card h3{margin:0 0 8px;font-size:23px;letter-spacing:-.03em}
+  .card p{margin:0;color:#475569}
+  .icon{
+    width:52px;height:52px;border-radius:16px;
+    display:grid;place-items:center;font-size:29px;font-weight:900;
+    margin-bottom:12px;
+    background:#eff6ff;color:var(--blue);
+    border:1px solid #bfdbfe;
+  }
+  .component{display:flex;gap:16px;align-items:flex-start}
+  .component .icon{margin:0;flex:0 0 auto}
+  .component strong{display:block;font-size:21px;color:#0f766e;margin-bottom:4px}
+  .flow{
+    width:100%;
+    border-radius:24px;
+    background:#fff;
+    border:1px solid #bfdbfe;
+    padding:20px;
+    overflow:hidden;
+  }
+  svg text{font-family:"Pretendard","Noto Sans KR","Segoe UI",Arial,sans-serif}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:18px;border:1px solid var(--line);background:#fff}
+  th{background:#e0f2fe;color:#075985;text-align:left;padding:15px 16px;font-size:17px}
+  td{padding:15px 16px;border-top:1px solid var(--line);vertical-align:top}
+  code,kbd{
+    font-family:"Consolas","D2Coding","Courier New",monospace;
+    background:#eef2ff;
+    color:#1e3a8a;
+    padding:.15em .38em;
+    border-radius:7px;
+  }
+  pre{
+    background:#0f172a;color:#e5e7eb;
+    padding:20px;border-radius:18px;
+    overflow:auto;border:1px solid #1e293b;
+    font-size:15px;line-height:1.55;
+  }
+  pre code{background:transparent;color:inherit;padding:0}
+  .rule{
+    display:flex;gap:14px;align-items:flex-start;
+    background:#f0fdf4;border:1px solid #bbf7d0;border-left:8px solid var(--green);
+    border-radius:18px;padding:18px 20px;margin-top:16px;
+  }
+  .rule b{color:#166534}
+  .timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:stretch}
+  .step{position:relative;background:#fff;border:1px solid #bfdbfe;border-radius:18px;padding:16px;min-height:142px}
+  .step:not(:last-child):after{
+    content:"→";position:absolute;right:-14px;top:50%;transform:translateY(-50%);
+    color:var(--blue);font-size:34px;font-weight:900;z-index:2;
+  }
+  .step .num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-weight:900;margin-bottom:8px}
+  .step h3{font-size:18px;margin:0 0 6px;line-height:1.25}
+  .step p{font-size:14px;color:#64748b;margin:0}
+  .summary{
+    background:linear-gradient(135deg,#111827,#1d4ed8);
+    color:white;border-radius:28px;padding:28px;margin-top:24px;
+    display:grid;grid-template-columns:120px 1fr;gap:24px;align-items:center;
+    box-shadow:var(--shadow);
+  }
+  .summary .bigicon{
+    width:110px;height:110px;border-radius:30px;background:rgba(255,255,255,.12);
+    display:grid;place-items:center;font-size:56px;border:1px solid rgba(255,255,255,.22)
+  }
+  .summary h2{margin:0 0 8px;font-size:32px}
+  .summary p{margin:0;font-size:21px;color:#e0f2fe}
+  .checklist{columns:2;column-gap:28px;padding-left:22px}
+  .checklist li{break-inside:avoid;margin:0 0 10px}
+  .footer{color:#64748b;text-align:center;margin-top:30px;font-size:14px}
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#dbeafe;color:#1e40af;font-weight:800;font-size:14px}
+  @media (max-width:900px){
+    .grid.two,.grid.three,.grid.six{grid-template-columns:1fr}
+    .timeline{grid-template-columns:1fr}
+    .step:not(:last-child):after{content:"↓";right:50%;top:auto;bottom:-25px;transform:translateX(50%);font-size:28px}
+    .summary{grid-template-columns:1fr;text-align:center}
+    .summary .bigicon{margin:0 auto}
+    .checklist{columns:1}
+  }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>Unity Netcode 쉽게 이해하기</h1>
+      <p>멀티플레이 게임에서 <b>누가 조작하고</b>, <b>누가 판단하고</b>, <b>그 결과를 어떻게 모두에게 보여줄지</b>를 관리하는 시스템입니다.</p>
+      <div class="badges">
+        <span class="badge">Netcode for GameObjects</span>
+        <span class="badge">NetworkManager</span>
+        <span class="badge">RPC</span>
+        <span class="badge">NetworkVariable</span>
+        <span class="badge">NetworkTransform</span>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2>1. Netcode가 왜 필요할까?</h2>
+      <p class="lead">싱글플레이에서는 내 컴퓨터에서 오브젝트를 움직이면 끝입니다. 하지만 멀티플레이에서는 <b>다른 플레이어의 컴퓨터에도 같은 결과가 보여야</b> 합니다.</p>
+      <div class="flow">
+        <svg viewBox="0 0 1100 360" role="img" aria-label="플레이어 A, 서버, 플레이어 B가 데이터를 주고받는 그림">
+          <defs>
+            <linearGradient id="serverGrad" x1="0" x2="1">
+              <stop offset="0" stop-color="#1e3a8a"/>
+              <stop offset="1" stop-color="#0891b2"/>
+            </linearGradient>
+            <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1e40af" flood-opacity=".18"/>
+            </filter>
+            <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+              <path d="M0,0 L12,6 L0,12 Z" fill="#2563eb"/>
+            </marker>
+            <marker id="arrowTeal" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+              <path d="M0,0 L12,6 L0,12 Z" fill="#0f9f8f"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="20" width="1060" height="320" rx="28" fill="#f8fbff" stroke="#bfdbfe"/>
+
+          <!-- player A -->
+          <g filter="url(#soft)">
+            <rect x="70" y="72" width="210" height="150" rx="22" fill="#ffffff" stroke="#bfdbfe"/>
+            <circle cx="125" cy="127" r="38" fill="#bfdbfe"/>
+            <circle cx="125" cy="112" r="22" fill="#f7c59f"/>
+            <path d="M101 110 q22-38 53 0 q-20-12-53 0z" fill="#111827"/>
+            <rect x="93" y="139" width="64" height="52" rx="18" fill="#2563eb"/>
+            <rect x="168" y="95" width="82" height="58" rx="8" fill="#1e293b"/>
+            <rect x="176" y="103" width="66" height="42" rx="5" fill="#a7f3d0"/>
+            <circle cx="209" cy="124" r="10" fill="#ef4444"/>
+            <text x="175" y="250" font-size="28" font-weight="900" fill="#1e3a8a" text-anchor="middle">플레이어 A</text>
+          </g>
+
+          <!-- server -->
+          <g filter="url(#soft)">
+            <rect x="440" y="64" width="220" height="170" rx="26" fill="#ffffff" stroke="#bfdbfe"/>
+            <rect x="486" y="88" width="128" height="42" rx="8" fill="url(#serverGrad)"/>
+            <rect x="486" y="136" width="128" height="42" rx="8" fill="url(#serverGrad)"/>
+            <rect x="486" y="184" width="128" height="42" rx="8" fill="url(#serverGrad)"/>
+            <circle cx="590" cy="109" r="5" fill="#86efac"/>
+            <circle cx="606" cy="109" r="5" fill="#67e8f9"/>
+            <circle cx="590" cy="157" r="5" fill="#86efac"/>
+            <circle cx="606" cy="157" r="5" fill="#67e8f9"/>
+            <circle cx="590" cy="205" r="5" fill="#86efac"/>
+            <circle cx="606" cy="205" r="5" fill="#67e8f9"/>
+            <path d="M645 124 l44 17 v34 c0 35-24 56-44 64-20-8-44-29-44-64v-34z" fill="#0f9f8f" stroke="#ffffff" stroke-width="5"/>
+            <path d="M625 173 l14 14 30-38" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="550" y="270" font-size="28" font-weight="900" fill="#1e3a8a" text-anchor="middle">서버 / 호스트</text>
+          </g>
+
+          <!-- player B -->
+          <g filter="url(#soft)">
+            <rect x="820" y="72" width="210" height="150" rx="22" fill="#ffffff" stroke="#bfdbfe"/>
+            <circle cx="975" cy="127" r="38" fill="#dcfce7"/>
+            <circle cx="975" cy="112" r="22" fill="#f7c59f"/>
+            <path d="M954 106 q30-28 53 6 q-20-8-53-6z" fill="#7c2d12"/>
+            <rect x="943" y="139" width="64" height="52" rx="18" fill="#16a34a"/>
+            <rect x="850" y="95" width="82" height="58" rx="8" fill="#1e293b"/>
+            <rect x="858" y="103" width="66" height="42" rx="5" fill="#a7f3d0"/>
+            <circle cx="891" cy="124" r="10" fill="#ef4444"/>
+            <text x="925" y="250" font-size="28" font-weight="900" fill="#1e3a8a" text-anchor="middle">플레이어 B</text>
+          </g>
+
+          <!-- arrows -->
+          <line x1="300" y1="112" x2="420" y2="112" stroke="#2563eb" stroke-width="10" marker-end="url(#arrowBlue)"/>
+          <line x1="420" y1="174" x2="300" y2="174" stroke="#0f9f8f" stroke-width="10" marker-end="url(#arrowTeal)"/>
+          <line x1="680" y1="112" x2="800" y2="112" stroke="#2563eb" stroke-width="10" marker-end="url(#arrowBlue)"/>
+          <line x1="800" y1="174" x2="680" y2="174" stroke="#0f9f8f" stroke-width="10" marker-end="url(#arrowTeal)"/>
+
+          <rect x="120" y="300" width="860" height="40" rx="20" fill="#e0f2fe"/>
+          <text x="550" y="327" text-anchor="middle" font-size="23" font-weight="800" fill="#075985">
+            이동 입력 → 서버 확인 → 모두에게 위치/상태 동기화
+          </text>
+        </svg>
+      </div>
+      <div class="highlight" style="margin-top:18px">
+        핵심: <b>클라이언트는 요청</b>하고, <b>서버는 검증</b>하고, <b>확정된 결과를 모든 클라이언트에게 동기화</b>합니다.
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>2. Unity Netcode의 핵심 구성 요소</h2>
+      <p class="lead">Unity Netcode는 GameObject / MonoBehaviour 방식에 네트워크 기능을 붙이는 구조입니다. 아래 6개만 먼저 이해하면 전체 그림이 보입니다.</p>
+      <div class="grid six">
+        <div class="card component"><div class="icon">🕹️</div><div><strong>NetworkManager</strong><p>Host, Server, Client 실행을 관리합니다. 플레이어 프리팹, Transport, 접속 상태도 여기서 관리합니다.</p></div></div>
+        <div class="card component"><div class="icon">⬢</div><div><strong>NetworkObject</strong><p>“이 오브젝트는 네트워크에서 공유되는 오브젝트입니다”라는 표시입니다.</p></div></div>
+        <div class="card component"><div class="icon">🧩</div><div><strong>NetworkBehaviour</strong><p>RPC, NetworkVariable, IsOwner, IsServer 같은 Netcode 기능을 쓰는 스크립트입니다.</p></div></div>
+        <div class="card component"><div class="icon">❤️</div><div><strong>NetworkVariable</strong><p>HP, 점수, 준비 상태처럼 계속 유지되어야 하는 값을 자동 동기화합니다.</p></div></div>
+        <div class="card component"><div class="icon">⚡</div><div><strong>RPC</strong><p>다른 컴퓨터에서 함수를 실행시키는 요청입니다. 공격, 점프, 이펙트처럼 순간 이벤트에 적합합니다.</p></div></div>
+        <div class="card component"><div class="icon">↔️</div><div><strong>NetworkTransform</strong><p>위치, 회전, 크기를 동기화합니다. 입문 단계의 플레이어 위치 동기화에 자주 사용합니다.</p></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. Client, Server, Owner 쉽게 구분하기</h2>
+      <div class="grid three">
+        <div class="card">
+          <div class="icon">💻</div>
+          <h3>Client</h3>
+          <p>플레이어가 실제로 조작하는 쪽입니다. 입력, 카메라, UI 같은 로컬 기능을 처리합니다.</p>
+          <ul>
+            <li>키보드 / 조이스틱 입력</li>
+            <li>내 카메라 추적</li>
+            <li>내 HP UI 표시</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="icon">🛡️</div>
+          <h3>Server</h3>
+          <p>게임의 중요한 결과를 최종 확정하는 쪽입니다. 치트 방지를 위해 핵심 판정은 서버가 담당하는 것이 안전합니다.</p>
+          <ul>
+            <li>데미지 판정</li>
+            <li>점수 처리</li>
+            <li>아이템 획득 확정</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="icon">👤</div>
+          <h3>Owner</h3>
+          <p>특정 NetworkObject를 조작할 권한이 있는 클라이언트입니다. 보통 내 플레이어 캐릭터의 Owner는 나입니다.</p>
+          <ul>
+            <li><code>IsOwner</code>가 true인 오브젝트만 입력 처리</li>
+            <li>다른 사람 캐릭터는 입력 처리 금지</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rule">
+        <div style="font-size:28px">⭐</div>
+        <div><b>입문자 공식</b><br>내 캐릭터 입력은 <code>IsOwner</code>로 제한하고, HP/점수/승패 같은 중요한 값 변경은 <code>IsServer</code>에서 처리합니다.</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4. 데이터 흐름 그림으로 보기</h2>
+      <p class="lead">예를 들어 플레이어가 공격 버튼을 눌렀을 때의 흐름입니다.</p>
+      <div class="timeline">
+        <div class="step"><span class="num">1</span><h3>플레이어 입력</h3><p>클라이언트에서 마우스 클릭 또는 공격 버튼 입력이 발생합니다.</p></div>
+        <div class="step"><span class="num">2</span><h3>RPC 요청</h3><p>클라이언트가 서버에게 “공격하고 싶다”고 요청합니다.</p></div>
+        <div class="step"><span class="num">3</span><h3>서버 판정</h3><p>서버가 거리, 쿨타임, 명중 여부, 데미지를 검사합니다.</p></div>
+        <div class="step"><span class="num">4</span><h3>값 변경</h3><p>서버가 HP, 점수, 상태값을 변경합니다.</p></div>
+        <div class="step"><span class="num">5</span><h3>전체 동기화</h3><p>변경된 결과가 모든 클라이언트 화면에 반영됩니다.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>5. 언제 무엇을 써야 할까?</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>기능</th>
+              <th>사용하는 경우</th>
+              <th>예시</th>
+              <th>기억법</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>NetworkVariable</b></td>
+              <td>계속 유지되어야 하는 상태값</td>
+              <td>HP, 점수, 준비 완료, 현재 무기 번호, 문 열림 상태</td>
+              <td>“값이 남아 있어야 하면 NetworkVariable”</td>
+            </tr>
+            <tr>
+              <td><b>RPC</b></td>
+              <td>순간적으로 발생하는 이벤트나 요청</td>
+              <td>공격 요청, 점프 요청, 이펙트 재생, 사운드 재생</td>
+              <td>“한 번 발생하고 끝나면 RPC”</td>
+            </tr>
+            <tr>
+              <td><b>NetworkTransform</b></td>
+              <td>Transform 정보 동기화</td>
+              <td>플레이어 위치, 회전, 크기</td>
+              <td>“움직임을 보여줘야 하면 NetworkTransform”</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>6. 가장 기본 코드 예시</h2>
+      <p class="lead">아래 코드는 “내 캐릭터만 입력을 받고 움직이게 하는” 가장 기본 구조입니다.</p>
+<pre><code>using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerMove : NetworkBehaviour
+{
+    [SerializeField] private float speed = 5f;
+
+    private void Update()
+    {
+        // 이 오브젝트의 주인이 내가 아니면 입력을 처리하지 않습니다.
+        if (!IsOwner)
+        {
+            return;
+        }
+
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+
+        Vector3 move = new Vector3(x, 0f, z).normalized;
+        transform.position += move * speed * Time.deltaTime;
+    }
+}</code></pre>
+
+      <p>그리고 서버에게 공격을 요청하는 구조는 아래처럼 생각하면 됩니다.</p>
+<pre><code>using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerAttack : NetworkBehaviour
+{
+    private void Update()
+    {
+        if (!IsOwner)
+        {
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            RequestAttackRpc();
+        }
+    }
+
+    // 클라이언트가 서버에게 공격 처리를 요청합니다.
+    [Rpc(SendTo.Server)]
+    private void RequestAttackRpc()
+    {
+        // 서버에서 실제 공격 판정, 데미지 계산, HP 감소를 처리합니다.
+        Debug.Log("서버에서 공격 판정");
+
+        PlayAttackEffectRpc();
+    }
+
+    // 서버가 클라이언트들에게 이펙트 재생을 요청합니다.
+    [Rpc(SendTo.NotServer)]
+    private void PlayAttackEffectRpc()
+    {
+        Debug.Log("클라이언트에서 공격 이펙트 재생");
+    }
+}</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>7. 입문자가 자주 하는 실수 체크리스트</h2>
+      <ul class="checklist">
+        <li><b>NetworkObject를 안 붙임</b> — 네트워크 오브젝트로 관리할 프리팹에는 필요합니다.</li>
+        <li><b>모든 플레이어가 입력을 받음</b> — 입력 코드는 보통 <code>if (!IsOwner) return;</code>으로 막아야 합니다.</li>
+        <li><b>클라이언트가 HP를 직접 변경함</b> — 데미지, 점수, 사망은 서버에서 확정하는 구조가 안전합니다.</li>
+        <li><b>UI와 카메라까지 네트워크 동기화하려 함</b> — UI와 카메라는 대부분 로컬 전용입니다.</li>
+        <li><b>RPC와 NetworkVariable을 반대로 사용함</b> — 상태는 NetworkVariable, 순간 이벤트는 RPC로 생각하면 쉽습니다.</li>
+        <li><b>Host에서는 되는데 Client에서는 안 됨</b> — Host는 서버와 클라이언트를 동시에 갖기 때문에 권한 문제가 숨겨질 수 있습니다.</li>
+      </ul>
+    </section>
+
+    <section class="summary">
+      <div class="bigicon">🌐</div>
+      <div>
+        <h2>한 줄 요약</h2>
+        <p><b>Unity Netcode</b>는 멀티플레이 게임에서 “누가 조작하고, 누가 판단하고, 어떻게 모두에게 보여줄지”를 관리하는 Unity 공식 네트워크 시스템입니다.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>추천 학습 순서</h2>
+      <p><span class="pill">1</span> NetworkManager 만들기 → <span class="pill">2</span> Host/Client 실행 → <span class="pill">3</span> Player Prefab 등록 → <span class="pill">4</span> NetworkObject 붙이기 → <span class="pill">5</span> IsOwner로 입력 제한 → <span class="pill">6</span> NetworkTransform → <span class="pill">7</span> NetworkVariable → <span class="pill">8</span> RPC → <span class="pill">9</span> 서버 권위 데미지 처리</p>
+    </section>
+
+    <p class="footer">
+      기준: Netcode for GameObjects 최신 릴리스 계열. 실제 프로젝트에서는 사용 중인 Unity 버전과 패키지 버전을 확인한 뒤 API 이름을 맞춰 사용하세요.
+    </p>
+  </main>
+</body>
+</html>

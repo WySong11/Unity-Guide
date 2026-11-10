@@ -1,0 +1,13 @@
+﻿ID,점검 주제,명령 또는 조치,합격 조건,실패 진단,필요 승인,결과(PASS/FAIL/NOT RUN),증거
+QA01,CLI 실행,Get-Command unity; unity --help,Unity CLI 도움말,CLI 미설치,없음,,
+QA02,Unity 프로젝트,Editor에서 버전과 대상 경로 확인,Unity 6.0+ 대상 프로젝트 열림,Editor 미실행,읽기,,
+QA03,Pipeline 설치,unity pipeline list,Pipeline: Installed,패키지/컴파일 문제,읽기,,
+QA04,Editor 명령 목록,unity command,대상 Editor 명령 목록 표시,다중 인스턴스/연결 오류,읽기,,
+QA05,설정 미리보기,unity mcp configure codex --dry-run,Unity MCP 변경점 확인,CLI 버전 또는 설정 파싱 오류,읽기,,
+QA06,Codex MCP 등록,codex mcp list,Unity 서버 항목 등록 표시,구성 미등록/세션,읽기,,
+QA07,Editor 실제 읽기,Codex MCP 도구로 활성 Scene 조회,Editor 화면 씬 이름과 일치,MCP 실행/권한 문제,읽기,,
+QA08,다중 Editor,대상 프로젝트 경로별 명령 분리,정확한 인스턴스 선택,잘못된 프로젝트,읽기,,
+QA09,쓰기 승인,별도 승인 후 신규 테스트 씬,기존 씬 수정 없이 요청만 수행,승인/실행 미수행,쓰기: 별도 승인,,
+QA10,변경 diff,Hierarchy/Source Control 비교,변경점 설명·복구 가능,미기록/원상복구 실패,읽기,,
+QA11,설정 보존,기존 config 백업 및 변화 항목 비교,다른 MCP/비밀 보존,백업 미수행,읽기,,
+QA12,종합 보고,PASS/FAIL/NOT RUN 및 실측 증거,근거 있는 완료 보고,증거 없음,읽기,,

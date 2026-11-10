@@ -1,0 +1,13 @@
+﻿ID,검증 대상,PASS 기준,단계,판정(PASS/FAIL/NOT RUN),증거/로그,비고
+QA01,CLI 및 Pipeline 연결,unity status·unity pipeline list 응답,READ ONLY,NOT RUN,,
+QA02,MCP 도구 스키마,Codex가 실제 Unity MCP 도구/매개변수 식별,READ ONLY,NOT RUN,,
+QA03,프로젝트 식별,현재 Editor와 요청 프로젝트 경로 일치,READ ONLY,NOT RUN,,
+QA04,활성 Scene 조회,Scene 이름·경로 Editor와 일치,READ ONLY,NOT RUN,,
+QA05,Hierarchy 조회,Root 개수·이름 Inspector와 일치,READ ONLY,NOT RUN,,
+QA06,Component/Transform 조회,Camera 또는 선택 객체 값 일치,READ ONLY,NOT RUN,,
+QA07,쓰기 승인,허용 파일/씬 범위·승인 증거 있음,APPROVAL,NOT RUN,,
+QA08,Scene 생성,Day71_EditorToolLab 아래 새 Scene 존재,WRITE,NOT RUN,,
+QA09,Cube 생성·Transform,"Cube 1개·Position (0,1,0)",WRITE,NOT RUN,,
+QA10,Spin 컴포넌트,Day71SpinCube 1개·Speed=45·컴파일 오류 0,WRITE,NOT RUN,,
+QA11,Scene 저장,저장 경로·파일·Git 상태 일치,WRITE,NOT RUN,,
+QA12,최종 보고,실제 도구 로그·PASS/FAIL/NOT RUN·원복 계획,REPORT,NOT RUN,,
